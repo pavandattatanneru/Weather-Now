@@ -1,0 +1,254 @@
+# Weather Now
+
+**Weather Now** is a React-based weather-checking application that provides current weather information, including temperature, wind speed, and weather code, by fetching data from the [Open-Meteo API](https://open-meteo.com/).
+
+## Features
+- Enter a city name to get real-time weather data.
+- Displays temperature, wind speed, and weather code.
+- Provides error handling for invalid city names or failed API requests.
+- Responsive design with a light/dark theme switch based on the user's system settings.
+
+## Tech Stack
+- **React**: Frontend library for building the UI.
+- **JavaScript (JSX)**: For building React components.
+- **Open-Meteo API**: Fetches weather data.
+- **CSS**: Styles the user interface.
+
+## Getting Started
+### Prerequisites
+- Node.js (v14 or above)
+- npm or yarn package manager
+
+##Navigate to the project directory:
+bash
+Copy code
+cd weather-now
+
+##Install dependencies:
+bash
+Copy code
+npm install
+
+##Start the application:
+bash
+Copy code
+npm start
+##Example
+Input: London
+Output:
+Temperature: 10°C
+Wind Speed: 15 km/h
+Weather Code: 2 (Partly Cloudy)
+
+##Project Structure
+java
+Copy code
+weather-now/
+├── public/
+├── src/
+│   ├── App.js
+│   ├── index.js
+│   ├── App.css
+│   └── index.css
+├── package.json
+└── README.md
+
+## APP.jsx
+import React, { useState } from 'react';
+import './App.css';  // Import the external CSS for styling
+
+function App() {
+  const [city, setCity] = useState('');
+  const [weatherData, setWeatherData] = useState(null);
+  const [error, setError] = useState('');
+
+  // Function to fetch latitude and longitude using Open-Meteo Geocoding API
+  const fetchCoordinates = async (cityName) => {
+    const geoApiUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}`;
+    try {
+      const response = await fetch(geoApiUrl);
+      const geoData = await response.json();
+
+      if (geoData.results && geoData.results.length > 0) {
+        const { latitude, longitude } = geoData.results[0];
+        return { latitude, longitude };
+      } else {
+        throw new Error('City not found');
+      }
+    } catch (error) {
+      setError('Failed to fetch coordinates');
+      console.error('Error:', error);
+      return null;
+    }
+  };
+
+  // Function to fetch weather data using Open-Meteo API
+  const fetchWeatherData = async () => {
+    const coordinates = await fetchCoordinates(city);
+
+    if (!coordinates) return;
+
+    const { latitude, longitude } = coordinates;
+    const weatherApiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+
+    try {
+      const response = await fetch(weatherApiUrl);
+      const data = await response.json();
+
+      if (data.current_weather) {
+        setWeatherData(data.current_weather);
+        setError('');
+      } else {
+        throw new Error('Weather data not available');
+      }
+    } catch (error) {
+      setError('Failed to fetch weather data');
+      console.error('Error:', error);
+    }
+  };
+
+  const handleSearch = () => {
+    if (city) {
+      setWeatherData(null);
+      setError('');
+      fetchWeatherData();
+    }
+  };
+
+  return (
+    <div className="app">
+      <h1>Weather Now</h1>
+      <input
+        type="text"
+        placeholder="Enter city name"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        className="input-field"
+      />
+      <button onClick={handleSearch} className="search-button">
+        Get Weather
+      </button>
+
+      {error && <p className="error-message">{error}</p>}
+
+      {weatherData && (
+        <div className="weather-info">
+          <h3>Weather Details:</h3>
+          <p>Temperature: {weatherData.temperature}°C</p>
+          <p>Wind Speed: {weatherData.windspeed} km/h</p>
+          <p>Weather Code: {weatherData.weathercode}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+
+## index.css
+import React, { useState } from 'react';
+import './App.css';  // Import the external CSS for styling
+
+function App() {
+  const [city, setCity] = useState('');
+  const [weatherData, setWeatherData] = useState(null);
+  const [error, setError] = useState('');
+
+  // Function to fetch latitude and longitude using Open-Meteo Geocoding API
+  const fetchCoordinates = async (cityName) => {
+    const geoApiUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}`;
+    try {
+      const response = await fetch(geoApiUrl);
+      const geoData = await response.json();
+
+      if (geoData.results && geoData.results.length > 0) {
+        const { latitude, longitude } = geoData.results[0];
+        return { latitude, longitude };
+      } else {
+        throw new Error('City not found');
+      }
+    } catch (error) {
+      setError('Failed to fetch coordinates');
+      console.error('Error:', error);
+      return null;
+    }
+  };
+
+  // Function to fetch weather data using Open-Meteo API
+  const fetchWeatherData = async () => {
+    const coordinates = await fetchCoordinates(city);
+
+    if (!coordinates) return;
+
+    const { latitude, longitude } = coordinates;
+    const weatherApiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+
+    try {
+      const response = await fetch(weatherApiUrl);
+      const data = await response.json();
+
+      if (data.current_weather) {
+        setWeatherData(data.current_weather);
+        setError('');
+      } else {
+        throw new Error('Weather data not available');
+      }
+    } catch (error) {
+      setError('Failed to fetch weather data');
+      console.error('Error:', error);
+    }
+  };
+
+  const handleSearch = () => {
+    if (city) {
+      setWeatherData(null);
+      setError('');
+      fetchWeatherData();
+    }
+  };
+
+  return (
+    <div className="app">
+      <h1>Weather Now</h1>
+      <input
+        type="text"
+        placeholder="Enter city name"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        className="input-field"
+      />
+      <button onClick={handleSearch} className="search-button">
+        Get Weather
+      </button>
+
+      {error && <p className="error-message">{error}</p>}
+
+      {weatherData && (
+        <div className="weather-info">
+          <h3>Weather Details:</h3>
+          <p>Temperature: {weatherData.temperature}°C</p>
+          <p>Wind Speed: {weatherData.windspeed} km/h</p>
+          <p>Weather Code: {weatherData.weathercode}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+
+## main.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+
+
